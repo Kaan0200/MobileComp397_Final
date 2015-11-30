@@ -1,8 +1,10 @@
 package com.example.kaan.vocomaster3000;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,6 +26,10 @@ public class MachineActivity extends AppCompatActivity {
     public Spinner mParameterSelector;
     public SeekBar mBPMSeekBar;
     public TextView mBPMTextView;
+    public TextView mTotalTimerTextView;
+    public TextView mBeatCountTextView;
+    public TextView mSectionCountTextView;
+    public TextView mLoopTimerTextView;
     public ToggleButton mPlayToggle;
     public Button mNewCustomButton;
 
@@ -59,6 +65,35 @@ public class MachineActivity extends AppCompatActivity {
     public ToggleButton beat15;
     public ToggleButton beat16;
 
+    public final Handler mHandle = new Handler();
+
+    public double time = 0;
+    public long startTime = 0;
+
+    public int currSection = 0;
+    // time for 2 measures
+    public double loopTime = 0;
+
+    public Runnable mTimerRunner = new Runnable() {
+        @Override
+        public void run() {
+            // this is the real time to account for delay
+            double totalTime = (System.currentTimeMillis() - startTime)/1000.0;
+
+
+            // update beat counter
+            double measureTime = totalTime % loopTime;
+
+            currSection = (int) ((measureTime / totalTime) * 16.0);
+
+            // update text views
+            mTotalTimerTextView.setText(String.format("%2f", totalTime));
+            mLoopTimerTextView.setText(String.format("%2f", loopTime));
+            mSectionCountTextView.setText(currSection + "/16");
+
+            mHandle.postDelayed(this, 10);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +111,11 @@ public class MachineActivity extends AppCompatActivity {
         mBPMSeekBar.setProgress(38);
         // get thmBPMTextViewview, set text
         mBPMTextView = (TextView) findViewById(R.id.bpmText);
-        mBPMTextView.setText("BMP: 128");
+        mBPMTextView.setText("BPM: 128");
+        mTotalTimerTextView = (TextView) findViewById(R.id.totalTimerText);
+        mBeatCountTextView = (TextView) findViewById(R.id.beatCountText);
+        mSectionCountTextView = (TextView) findViewById(R.id.sectionNumberText);
+        mLoopTimerTextView = (TextView) findViewById(R.id.loopTimeTextView);
         // get all the toggles
         findAllBeatToggleButtons();
         mPlayToggle = (ToggleButton) findViewById(R.id.playToggle);
@@ -98,13 +137,24 @@ public class MachineActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
 
         // set up the on change listener for the play button
-        mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener(){
+        mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener()
+        {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
                 if (b == false) { // STOP
-                    //TODO: Get stop to stop
+                    mHandle.removeCallbacks(mTimerRunner);
                 } else { // PLAY
-                    //TODO: Get play working
+                    // reset the timer
+                    startTime = System.currentTimeMillis();
+                    //time = 0;
+
+                    // calculate the time for two measures
+                    loopTime = ((1.0 / (double) mBPMSeekBar.getProgress() + 90.0)/60.0)*2.0;
+
+
+                    // start counting
+                    mHandle.postDelayed(mTimerRunner, 0);
                 }
             }
         });
@@ -136,11 +186,11 @@ public class MachineActivity extends AppCompatActivity {
                 }
                 // 2.
                 // clean line and set into new values
-                lastLine = (String)mInstrumentSelector.getSelectedItem();
+                lastLine = (String) mInstrumentSelector.getSelectedItem();
 
                 // 3.
                 // last line is now current, so load in the appropriate intArray
-                switch (lastLine){
+                switch (lastLine) {
                     case "Kick":
                         // save into previous value
                         SetToggleLine(kickLine);
@@ -173,16 +223,19 @@ public class MachineActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 // range from 90 to 180
                 int value = i + 90;
-                mBPMTextView.setText("BPM: "+ value);
+                mBPMTextView.setText("BPM: " + value);
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) { }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) { }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
-        mNewCustomButton.setOnClickListener(new Button.OnClickListener(){
+        mNewCustomButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // start the record intent
@@ -265,6 +318,10 @@ public class MachineActivity extends AppCompatActivity {
     }
 
     private void PlaySequencer(){
+
+    }
+
+    private void RefreshCreatedSounds(){
 
     }
 }
