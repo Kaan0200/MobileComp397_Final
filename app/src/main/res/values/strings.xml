@@ -4,7 +4,7 @@
     <string-array name="instruments">
         <item>"Kick"</item>
         <item>"Clap"</item>
-        <item>"Cymbal"</item>
+        <item>"HighHat"</item>
         <item>"Custom"</item>
     </string-array>
     <string-array name="kick_type">
@@ -15,8 +15,9 @@
     <string-array name="clap_type">
         <item>"clap1"</item>
     </string-array>
-    <string-array name="cymbal_type">
-        <item>"cymbal1"</item>
+    <string-array name="highhat_type">
+        <item>"Loose"</item>
+        <item>"Tight"</item>
     </string-array>
     <string-array name="param_length">
         <item>1</item>
@@ -25,4 +26,5 @@
         <item>8</item>
         <item>16</item>
     </string-array>
+    <string name="title_activity_record">RecordActivity</string>
 </resources>

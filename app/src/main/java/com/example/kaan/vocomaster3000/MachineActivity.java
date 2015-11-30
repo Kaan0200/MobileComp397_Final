@@ -1,5 +1,6 @@
 package com.example.kaan.vocomaster3000;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -27,7 +28,7 @@ public class MachineActivity extends AppCompatActivity {
     public Button mNewCustomButton;
 
     public int mSelectedKick;
-    public int mSelectedCymbal;
+    public int mSelectedHat;
     public int mSelectedClap;
     public int mSelectedCustom;
 
@@ -94,7 +95,7 @@ public class MachineActivity extends AppCompatActivity {
         final ArrayAdapter<String> clapAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.clap_type));
         final ArrayAdapter<String> cymbAdapter = new ArrayAdapter<>
-                (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.cymbal_type));
+                (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
 
         // set up the on change listener for the play button
         mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener(){
@@ -123,13 +124,14 @@ public class MachineActivity extends AppCompatActivity {
                         clapLine = GetToggleLine();
                         mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
                         break;
-                    case "Cymbal":
+                    case "Highhat":
                         cymbalLine = GetToggleLine();
-                        mSelectedCymbal = mInstrumentTypeSelector.getSelectedItemPosition();
+                        mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
                         break;
                     case "Custom":
                         customLine = GetToggleLine();
                         mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
+                        mNewCustomButton.setEnabled(false);
                         break;
                 }
                 // 2.
@@ -149,12 +151,13 @@ public class MachineActivity extends AppCompatActivity {
                         SetToggleLine(clapLine);
                         mInstrumentTypeSelector.setAdapter(clapAdapter);
                         break;
-                    case "Cymbal":
+                    case "Highhat":
                         SetToggleLine(cymbalLine);
                         mInstrumentTypeSelector.setAdapter(cymbAdapter);
                         break;
                     case "Custom":
                         SetToggleLine(customLine);
+                        mNewCustomButton.setEnabled(true);
                         //TODO: create and handle adapter for custom sounds
                         break;
                 }
@@ -182,7 +185,9 @@ public class MachineActivity extends AppCompatActivity {
         mNewCustomButton.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View view) {
-                //TODO: Start a new activity and record sound there
+                // start the record intent
+                Intent recordIntent = new Intent(MachineActivity.this, RecordActivity.class);
+                MachineActivity.this.startActivity(recordIntent);
             }
         });
     }
