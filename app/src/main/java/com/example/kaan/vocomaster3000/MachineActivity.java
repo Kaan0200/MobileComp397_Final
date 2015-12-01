@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 
 public class MachineActivity extends AppCompatActivity {
 
@@ -73,6 +74,8 @@ public class MachineActivity extends AppCompatActivity {
     public int currSection = 0;
     // time for 2 measures
     public double loopTime = 0;
+    public double beatTime = 0;
+    public double sectTime = 0;
 
     public Runnable mTimerRunner = new Runnable() {
         @Override
@@ -87,9 +90,12 @@ public class MachineActivity extends AppCompatActivity {
             currSection = (int) ((measureTime / totalTime) * 16.0);
 
             // update text views
-            mTotalTimerTextView.setText(String.format("%2f", totalTime));
-            mLoopTimerTextView.setText(String.format("%2f", loopTime));
-            mSectionCountTextView.setText(currSection + "/16");
+            mTotalTimerTextView.setText(String.format("%.3f", totalTime));
+            double movingLoopTime = totalTime % loopTime;
+            mLoopTimerTextView.setText(String.format("%.3f",  movingLoopTime));
+            mBeatCountTextView.setText((int)(totalTime / beatTime)+"");
+            int movingSectTime = (int) (movingLoopTime / sectTime);
+            mSectionCountTextView.setText(movingSectTime+"/16");
 
             mHandle.postDelayed(this, 10);
         }
@@ -150,8 +156,9 @@ public class MachineActivity extends AppCompatActivity {
                     //time = 0;
 
                     // calculate the time for two measures
-                    loopTime = ((1.0 / (double) mBPMSeekBar.getProgress() + 90.0)/60.0)*2.0;
-
+                    loopTime = 1.0/((((double) mBPMSeekBar.getProgress() + 90.0)/8.0)/60);
+                    beatTime = loopTime / 8.0;
+                    sectTime = loopTime / 16.0;
 
                     // start counting
                     mHandle.postDelayed(mTimerRunner, 0);
