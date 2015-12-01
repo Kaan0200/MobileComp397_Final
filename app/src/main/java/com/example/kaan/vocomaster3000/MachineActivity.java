@@ -1,23 +1,23 @@
 package com.example.kaan.vocomaster3000;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
-import java.lang.reflect.Array;
-import java.text.DecimalFormat;
 
 public class MachineActivity extends AppCompatActivity {
 
@@ -38,6 +38,10 @@ public class MachineActivity extends AppCompatActivity {
     public int mSelectedHat;
     public int mSelectedClap;
     public int mSelectedCustom;
+    public String mSelectedKickType = "trance";
+    public String mSelectedClapType = "clap1";
+    public String mSelectedHatType = "loose";
+    public String mSelectedCustomType; //TODO: if none, then dont
 
     // variable to hold which was the last selected line, for saving
     // default: kick
@@ -66,36 +70,41 @@ public class MachineActivity extends AppCompatActivity {
     public ToggleButton beat15;
     public ToggleButton beat16;
 
+    public SoundPool mSoundPool;
+    public int kickSoundId;
+    public int clapSoundId;
+    public int hhatSoundId;
+    //TODO: loaded custom sound ID
+
+    // this is the timers and variables for the timer thread
     public final Handler mHandle = new Handler();
-
-    public double time = 0;
     public long startTime = 0;
-
-    public int currSection = 0;
+    public int movingSectTime = 0;
     // time for 2 measures
     public double loopTime = 0;
     public double beatTime = 0;
     public double sectTime = 0;
-
     public Runnable mTimerRunner = new Runnable() {
         @Override
         public void run() {
+
             // this is the real time to account for delay
-            double totalTime = (System.currentTimeMillis() - startTime)/1000.0;
-
-
-            // update beat counter
-            double measureTime = totalTime % loopTime;
-
-            currSection = (int) ((measureTime / totalTime) * 16.0);
-
+            final double totalTime = (System.currentTimeMillis() - startTime)/1000.0;
             // update text views
-            mTotalTimerTextView.setText(String.format("%.3f", totalTime));
-            double movingLoopTime = totalTime % loopTime;
-            mLoopTimerTextView.setText(String.format("%.3f",  movingLoopTime));
-            mBeatCountTextView.setText((int)(totalTime / beatTime)+"");
-            int movingSectTime = (int) (movingLoopTime / sectTime);
-            mSectionCountTextView.setText(movingSectTime+"/16");
+            final double movingLoopTime = totalTime % loopTime;
+            final int temptSect = (int) (movingLoopTime / sectTime) + 1;
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateSectionNumber(temptSect);
+
+                    mLoopTimerTextView.setText(String.format("%.3f", movingLoopTime));
+                    mBeatCountTextView.setText((int) (totalTime / beatTime) + "");
+                    mTotalTimerTextView.setText(String.format("%.3f", totalTime));
+                    mSectionCountTextView.setText(movingSectTime + "/16");
+                }
+            });
 
             mHandle.postDelayed(this, 10);
         }
@@ -143,20 +152,42 @@ public class MachineActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
 
         // set up the on change listener for the play button
-        mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener()
-        {
+        mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
                 if (b == false) { // STOP
                     mHandle.removeCallbacks(mTimerRunner);
                 } else { // PLAY
+                    // save the lines
+                    switch (mInstrumentSelector.getSelectedItem().toString()) {
+                        case "Kick":
+                            kickLine = SaveToggleLine();
+                            mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
+                            break;
+                        case "Clap":
+                            clapLine = SaveToggleLine();
+                            mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
+                            break;
+                        case "Highhat":
+                            cymbalLine = SaveToggleLine();
+                            mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
+                            break;
+                        case "Custom":
+                            customLine = SaveToggleLine();
+                            mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
+                            break;
+                    }
+                    // load the selected sounds into the pool
+                    LoadSounds_AwaitCompletion();
+
+
                     // reset the timer
                     startTime = System.currentTimeMillis();
                     //time = 0;
 
                     // calculate the time for two measures
-                    loopTime = 1.0/((((double) mBPMSeekBar.getProgress() + 90.0)/8.0)/60);
+                    loopTime = 1.0 / ((((double) mBPMSeekBar.getProgress() + 90.0) / 8.0) / 60);
                     beatTime = loopTime / 8.0;
                     sectTime = loopTime / 16.0;
 
@@ -172,24 +203,33 @@ public class MachineActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 // 1.
                 // Save the last Line into its intArray, and the selected type
-                switch (lastLine) {
-                    case "Kick":
-                        kickLine = GetToggleLine();
-                        mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
-                        break;
-                    case "Clap":
-                        clapLine = GetToggleLine();
-                        mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
-                        break;
-                    case "Highhat":
-                        cymbalLine = GetToggleLine();
-                        mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
-                        break;
-                    case "Custom":
-                        customLine = GetToggleLine();
-                        mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
-                        mNewCustomButton.setEnabled(false);
-                        break;
+                try {
+                    switch (lastLine) {
+                        case "Kick":
+                            kickLine = SaveToggleLine();
+                            mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedKickType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            break;
+                        case "Clap":
+                            clapLine = SaveToggleLine();
+                            mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedClapType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            break;
+                        case "Highhat":
+                            cymbalLine = SaveToggleLine();
+                            mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedHatType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            break;
+                        case "Custom":
+                            customLine = SaveToggleLine();
+                            mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedCustomType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mNewCustomButton.setEnabled(false);
+                            break;
+                    }
+                } catch (NullPointerException e) {
+                    // do nothing since this will always get tripped
+                    // when starting up the application
                 }
                 // 2.
                 // clean line and set into new values
@@ -224,6 +264,34 @@ public class MachineActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> adapterView) { /*Nothing*/ }
         });
 
+        mInstrumentTypeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (mInstrumentSelector.getSelectedItem().toString()) {
+                    case "Kick":
+                        mSelectedKick = i;
+                        mSelectedKickType = mInstrumentTypeSelector.getSelectedItem().toString();
+                        break;
+                    case "Clap":
+                        mSelectedClap = i;
+                        mSelectedClapType = mInstrumentTypeSelector.getSelectedItem().toString();
+                        break;
+                    case "Highhat":
+                        mSelectedHat = i;
+                        mSelectedHatType = mInstrumentTypeSelector.getSelectedItem().toString();
+                        break;
+                    case "Custom":
+                        mSelectedCustom = i;
+                        mSelectedCustomType = mInstrumentTypeSelector.getSelectedItem().toString();
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) { /* Nothing */}
+        });
+
         // set up the on change listener for the seekbar
         mBPMSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -250,6 +318,10 @@ public class MachineActivity extends AppCompatActivity {
                 MachineActivity.this.startActivity(recordIntent);
             }
         });
+
+        // set up for audio playback
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mSoundPool = new SoundPool.Builder().setMaxStreams(4).build();
     }
 
     // helper method for onCreate to find all the togglebuttons
@@ -274,7 +346,7 @@ public class MachineActivity extends AppCompatActivity {
 
     // this method is called when changing instrument types to save the places that
     //beats were placed.
-    private boolean[] GetToggleLine() {
+    private boolean[] SaveToggleLine() {
         boolean[] returnLine = {
                 beat1.isChecked(),
                 beat2.isChecked(),
@@ -324,11 +396,122 @@ public class MachineActivity extends AppCompatActivity {
         }
     }
 
-    private void PlaySequencer(){
+    public void updateSectionNumber(int i) {
+        // section has changed, update it
+        if (i != movingSectTime){
+            movingSectTime = i;
+            int onColor = Color.parseColor("#FF5FAE5D");
+            int base = Color.parseColor("#FF000000");
 
+            TriggerInstrumentsOnBeat(movingSectTime);
+            switch (movingSectTime){
+                case 1:
+                    beat16.setTextColor(base);
+                    beat1.setTextColor(onColor);
+                    break;
+                case 2:
+                    beat1.setTextColor(base);
+                    beat2.setTextColor(onColor);
+                    break;
+                case 3:
+                    beat2.setTextColor(base);
+                    beat3.setTextColor(onColor);
+                    break;
+                case 4:
+                    beat3.setTextColor(base);
+                    beat4.setTextColor(onColor);
+                    break;
+                case 5:
+                    beat4.setTextColor(base);
+                    beat5.setTextColor(onColor);
+                    break;
+                case 6:
+                    beat5.setTextColor(base);
+                    beat6.setTextColor(onColor);
+                    break;
+                case 7:
+                    beat6.setTextColor(base);
+                    beat7.setTextColor(onColor);
+                    break;
+                case 8:
+                    beat7.setTextColor(base);
+                    beat8.setTextColor(onColor);
+                    break;
+                case 9:
+                    beat8.setTextColor(base);
+                    beat9.setTextColor(onColor);
+                    break;
+                case 10:
+                    beat9.setTextColor(base);
+                    beat10.setTextColor(onColor);
+                    break;
+                case 11:
+                    beat10.setTextColor(base);
+                    beat11.setTextColor(onColor);
+                    break;
+                case 12:
+                    beat11.setTextColor(base);
+                    beat12.setTextColor(onColor);
+                    break;
+                case 13:
+                    beat12.setTextColor(base);
+                    beat13.setTextColor(onColor);
+                    break;
+                case 14:
+                    beat13.setTextColor(base);
+                    beat14.setTextColor(onColor);
+                    break;
+                case 15:
+                    beat14.setTextColor(base);
+                    beat15.setTextColor(onColor);
+                    break;
+                case 16:
+                    beat15.setTextColor(base);
+                    beat16.setTextColor(onColor);
+                    break;
+            }
+        }
     }
 
-    private void RefreshCreatedSounds(){
+    private void TriggerInstrumentsOnBeat(int beat){
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        float v = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        beat--; // adjust for array
+        if (kickLine[beat] == true){
+             Log.i("SOUND!", "kick on beat" + beat);
+            mSoundPool.play(kickSoundId, v, v, 1, 0, 1f);
+        }
+        if (clapLine[beat] == true){
+            Log.i("SOUND!", "clap on beat" + beat);
+            mSoundPool.play(clapSoundId, v, v, 1, 0, 1f);
+        }
+        if (cymbalLine[beat] == true){
+            Log.i("SOUND!", "hat on beat" + beat);
+            mSoundPool.play(hhatSoundId, v, v, 1, 0, 1f);
+        }
+        //TODO: add custom sound
+    }
 
+    private void LoadSounds_AwaitCompletion(){
+        mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int i, int i1) {
+                Log.i("SOUNDLOADED", "loaded sound with ID:" + i);
+            }
+        });
+
+        String kickName = "k_"+ mSelectedKickType.toLowerCase();
+        kickSoundId = mSoundPool.load(this,
+                MachineActivity.this.getResources().getIdentifier(kickName, "raw", MachineActivity.this.getPackageName()),
+                1);
+        String clapName = "c_"+ mSelectedClapType.toLowerCase();
+        clapSoundId = mSoundPool.load(this,
+                MachineActivity.this.getResources().getIdentifier(clapName, "raw", MachineActivity.this.getPackageName()),
+                1);
+        String hhatName = "h_"+ mSelectedHatType.toLowerCase();
+        hhatSoundId = mSoundPool.load(this,
+                MachineActivity.this.getResources().getIdentifier(hhatName, "raw", MachineActivity.this.getPackageName()),
+                1);
+        //TODO: load the custom sound to the SoundPool
     }
 }
