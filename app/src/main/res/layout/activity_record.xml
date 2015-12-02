@@ -30,8 +30,8 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save Recording"
-                android:id="@+id/button2" />
+                android:text="Play Recording"
+                android:id="@+id/recordPlayButton" />
         </LinearLayout>
 
         <LinearLayout
@@ -53,8 +53,9 @@
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/seekBar"
-                android:layout_weight="3" />
+                android:id="@+id/recordBar"
+                android:layout_weight="3"
+                android:indeterminate="false" />
 
             <TextView
                 android:layout_width="0dp"

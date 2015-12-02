@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import java.io.File;
@@ -22,6 +23,7 @@ public class RecordActivity extends AppCompatActivity {
     private static final String LOG_TAG = "AudioRecordTest";
     private static String mFileName = null;
 
+    private SeekBar mProgress;
     private ToggleButton mRecordButton;
     private Button mPlayButton = null;
     private MediaRecorder mRecorder = null;
@@ -33,18 +35,29 @@ public class RecordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_record);
+
+        mProgress = (SeekBar) findViewById(R.id.recordBar);
+        mProgress.setContextClickable(false);
+
+        mPlayButton = (Button) findViewById(R.id.recordPlayButton);
+        mPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPlaying = !mPlaying;
+                onPlay(mPlaying);
+            }
+        });
 
         mRecordButton = (ToggleButton) findViewById(R.id.recordToggleButton);
-        //mRecordButton.setText("Record");
-        /*mRecordButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
+        mRecordButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(ToggleButton buttonView, boolean isChecked) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mRecording = isChecked;
                 onRecord(mRecording);
             }
-        }); */
+        });
 
-        setContentView(R.layout.activity_record);
     }
 
     private void onRecord(boolean start) {
