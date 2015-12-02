@@ -123,6 +123,7 @@ public class MachineActivity extends AppCompatActivity {
 
         // get the custom button
         mNewCustomButton = (Button) findViewById(R.id.newCustomButton);
+        mNewCustomButton.setEnabled(false);
         // get the spinners
         mInstrumentSelector = (Spinner) findViewById(R.id.instrumentSelectorSpinner);
         mInstrumentTypeSelector = (Spinner) findViewById(R.id.instrumentTypeSpinner);
@@ -180,18 +181,22 @@ public class MachineActivity extends AppCompatActivity {
                         case "Kick":
                             kickLine = SaveToggleLine();
                             mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedKickVolume = mInstrumentVolumeSeekBar.getProgress();
                             break;
                         case "Clap":
                             clapLine = SaveToggleLine();
                             mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedClapVolume = mInstrumentVolumeSeekBar.getProgress();
                             break;
                         case "Highhat":
                             cymbalLine = SaveToggleLine();
                             mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedHatVolume = mInstrumentVolumeSeekBar.getProgress();
                             break;
                         case "Custom":
                             customLine = SaveToggleLine();
                             mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
+                            mSelectedCustomVolume = mInstrumentVolumeSeekBar.getProgress();
                             break;
                     }
 
@@ -225,24 +230,28 @@ public class MachineActivity extends AppCompatActivity {
                             kickLine = SaveToggleLine();
                             mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedKickType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mSelectedKickVolume = mInstrumentVolumeSeekBar.getProgress();
                             mNewCustomButton.setEnabled(false);
                             break;
                         case "Clap":
                             clapLine = SaveToggleLine();
                             mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedClapType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mSelectedClapVolume = mInstrumentVolumeSeekBar.getProgress();
                             mNewCustomButton.setEnabled(false);
                             break;
                         case "Highhat":
                             cymbalLine = SaveToggleLine();
                             mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedHatType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mSelectedHatVolume = mInstrumentVolumeSeekBar.getProgress();
                             mNewCustomButton.setEnabled(false);
                             break;
                         case "Custom":
                             customLine = SaveToggleLine();
                             mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedCustomType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mSelectedCustomVolume = mInstrumentVolumeSeekBar.getProgress();
                             mNewCustomButton.setEnabled(true);
                             break;
                     }
@@ -262,19 +271,23 @@ public class MachineActivity extends AppCompatActivity {
                         SetToggleLine(kickLine);
                         SetInstrumentType(mSelectedKick);
                         mInstrumentTypeSelector.setAdapter(kickAdapter);
+                        mInstrumentVolumeSeekBar.setProgress(mSelectedKickVolume);
                         break;
                     case "Clap":
                         SetToggleLine(clapLine);
                         mInstrumentTypeSelector.setAdapter(clapAdapter);
+                        mInstrumentVolumeSeekBar.setProgress(mSelectedClapVolume);
                         break;
                     case "Highhat":
                         SetToggleLine(cymbalLine);
                         mInstrumentTypeSelector.setAdapter(cymbAdapter);
+                        mInstrumentVolumeSeekBar.setProgress(mSelectedHatVolume);
                         break;
                     case "Custom":
                         SetToggleLine(customLine);
                         mNewCustomButton.setEnabled(true);
                         //TODO: create and handle adapter for custom sounds
+                        mInstrumentVolumeSeekBar.setProgress(mSelectedCustomVolume);
                         break;
                 }
             }
@@ -321,12 +334,23 @@ public class MachineActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        mInstrumentVolumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                // range from 0 to 10
+                mInstrumentVolumeTextView.setText("Volume: " + i);
             }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         mNewCustomButton.setOnClickListener(new Button.OnClickListener() {
@@ -498,15 +522,15 @@ public class MachineActivity extends AppCompatActivity {
         beat--; // adjust for array
         if (kickLine[beat] == true){
              Log.i("SOUND!", "kick on beat" + beat);
-            mSoundPool.play(kickSoundId, v, v, 1, 0, 1f);
+            mSoundPool.play(kickSoundId, mSelectedKickVolume, mSelectedKickVolume, 1, 0, 1f);
         }
         if (clapLine[beat] == true){
             Log.i("SOUND!", "clap on beat" + beat);
-            mSoundPool.play(clapSoundId, v, v, 1, 0, 1f);
+            mSoundPool.play(clapSoundId, mSelectedClapVolume, mSelectedClapVolume, 1, 0, 1f);
         }
         if (cymbalLine[beat] == true){
             Log.i("SOUND!", "hat on beat" + beat);
-            mSoundPool.play(hhatSoundId, v, v, 1, 0, 1f);
+            mSoundPool.play(hhatSoundId, mSelectedHatVolume, mSelectedHatVolume, 1, 0, 1f);
         }
         //TODO: add custom sound
     }

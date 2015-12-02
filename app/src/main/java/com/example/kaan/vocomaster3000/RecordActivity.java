@@ -38,7 +38,7 @@ public class RecordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_record);
 
         mProgress = (SeekBar) findViewById(R.id.recordBar);
-        mProgress.setContextClickable(false);
+        mProgress.setEnabled(false);
 
         mPlayButton = (Button) findViewById(R.id.recordPlayButton);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
