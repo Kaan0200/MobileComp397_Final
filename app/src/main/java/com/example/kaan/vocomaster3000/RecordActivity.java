@@ -1,9 +1,13 @@
 package com.example.kaan.vocomaster3000;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,10 +41,40 @@ public class RecordActivity extends AppCompatActivity {
     private boolean mRecording = false;
     private boolean mPlaying = false;
 
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    /**
+     * Checks if the app has permission to write to device storage
+     *
+     * If the app does not has permission then the user will be prompted to grant permissions
+     *
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
+
+        verifyStoragePermissions(this);
 
         mProgress = (SeekBar) findViewById(R.id.recordBar);
         mProgress.setEnabled(false);
@@ -104,11 +138,11 @@ public class RecordActivity extends AppCompatActivity {
             mPlayer = new MediaPlayer();
             mPlayButton.setText("Stop");
             try {
-                mPlayer.setDataSource(mFileName);
+                mPlayer.setDataSource(Environment.getExternalStorageDirectory() + mFileName);
                 mPlayer.prepare();
                 mPlayer.start();
             } catch (IOException e) {
-                Log.e(LOG_TAG, "prepare() failed");
+                Log.e(LOG_TAG, e.getMessage());
             }
         }
     }
@@ -131,26 +165,31 @@ public class RecordActivity extends AppCompatActivity {
         // Make filename from timestamp
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        mFileName = dateFormat.format(date);      // 20151123-15:59:48
-        String filename = Environment.getExternalStorageDirectory().getAbsolutePath();
-        filename += mFileName;
+        String name = dateFormat.format(date) + ".3gp";      // 20151123-15:59:48
+
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
+        File dir = new File(path);
+        if(!dir.exists())
+            dir.mkdirs();
+        String file = path + name;
+        mFileName = "/FinalProj/" + name;
 
         mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        mRecorder.setOutputFile(filename);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mRecorder.setOutputFile(file);
 
         try {
             mRecorder.prepare();
+            mRecorder.start();
         } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
+            Log.e(LOG_TAG, e.getMessage());
         }
-
-        mRecorder.start();
     }
 
     private void stopRecording() {
+        Log.i("REC", "Stopped recording");
         mRecordButton.setText("Record");
         mPlayButton.setEnabled(true);
 
