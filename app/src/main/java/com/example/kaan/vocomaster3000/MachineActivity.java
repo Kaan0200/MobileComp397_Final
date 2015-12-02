@@ -151,6 +151,7 @@ public class MachineActivity extends AppCompatActivity {
         final ArrayAdapter<String> cymbAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
 
+
         // set up the on change listener for the play button
         mPlayToggle.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
             @Override
