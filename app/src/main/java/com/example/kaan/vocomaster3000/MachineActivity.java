@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +19,8 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import java.util.ArrayList;
 
 public class MachineActivity extends AppCompatActivity {
 
@@ -48,6 +51,8 @@ public class MachineActivity extends AppCompatActivity {
     public int mSelectedClapVolume   = 10;
     public int mSelectedHatVolume    = 10;
     public int mSelectedCustomVolume = 10;
+
+    public ArrayList<String> mRecordings;
 
     // variable to hold which was the last selected line, for saving
     // default: kick
@@ -80,6 +85,7 @@ public class MachineActivity extends AppCompatActivity {
     public int kickSoundId;
     public int clapSoundId;
     public int hhatSoundId;
+    public int custSoundId;
     //TODO: loaded custom sound ID
 
     // this is the timers and variables for the timer thread
@@ -120,6 +126,8 @@ public class MachineActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_machine);
+
+        mRecordings = new ArrayList<>();
 
         // get the custom button
         mNewCustomButton = (Button) findViewById(R.id.newCustomButton);
@@ -334,7 +342,8 @@ public class MachineActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // start the record intent
                 Intent recordIntent = new Intent(MachineActivity.this, RecordActivity.class);
-                MachineActivity.this.startActivity(recordIntent);
+                //MachineActivity.this.startActivity(recordIntent);
+                MachineActivity.this.startActivityForResult(recordIntent, 1);
             }
         });
 
@@ -509,6 +518,10 @@ public class MachineActivity extends AppCompatActivity {
             mSoundPool.play(hhatSoundId, v, v, 1, 0, 1f);
         }
         //TODO: add custom sound
+        if (customLine[beat] == true){
+            Log.i("SOUND!", "custom on beat" + beat);
+            mSoundPool.play(custSoundId, v, v, 1, 0, 1f);
+        }
     }
 
     private void LoadSounds_AwaitCompletion(){
@@ -531,6 +544,19 @@ public class MachineActivity extends AppCompatActivity {
         hhatSoundId = mSoundPool.load(this,
                 MachineActivity.this.getResources().getIdentifier(hhatName, "raw", MachineActivity.this.getPackageName()),
                 1);
+
         //TODO: load the custom sound to the SoundPool
+        String customName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        customName += mSelectedCustomType;
+        custSoundId = mSoundPool.load(customName, 1);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Retrieve list of filenames recorded since last navigation
+        if (resultCode == RESULT_OK && data != null) {
+            mRecordings.addAll(data.getStringArrayListExtra("recordings"));
+        }
     }
 }
