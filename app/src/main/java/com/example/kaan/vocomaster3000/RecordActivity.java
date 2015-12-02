@@ -2,6 +2,8 @@ package com.example.kaan.vocomaster3000;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
@@ -32,14 +35,16 @@ public class RecordActivity extends AppCompatActivity {
 
     private ArrayList<String> mRecordings;
 
-    private SeekBar mProgress;
+    private EditText mFileNameTextBox;
     private ToggleButton mRecordButton;
     private Button mPlayButton = null;
+    private Button mReturnButton;
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
 
     private boolean mRecording = false;
     private boolean mPlaying = false;
+
 
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -76,9 +81,6 @@ public class RecordActivity extends AppCompatActivity {
 
         verifyStoragePermissions(this);
 
-        mProgress = (SeekBar) findViewById(R.id.recordBar);
-        mProgress.setEnabled(false);
-
         mPlayButton = (Button) findViewById(R.id.recordPlayButton);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +89,19 @@ public class RecordActivity extends AppCompatActivity {
                 onPlay(mPlaying);
             }
         });
+
+        mReturnButton = (Button) findViewById(R.id.returnButton);
+        mReturnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent output = new Intent();
+                output.putStringArrayListExtra("recordings", mRecordings);
+                setResult(RESULT_OK, output);
+                finish();
+            }
+        });
+
+        mFileNameTextBox = (EditText) findViewById(R.id.fileNameTextBox);
 
         mRecordButton = (ToggleButton) findViewById(R.id.recordToggleButton);
         mRecordButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -118,19 +133,33 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
+        if (mFileNameTextBox.getText().toString().isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setMessage("You must give this file a name")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mRecording = false;
+                            mRecordButton.setChecked(false);
+                        }
+                    }).show();
             stopRecording();
+        } else {
+            if (start) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
         }
+
     }
 
     private void onPlay(boolean start) {
-        if (start) {
-            startPlaying();
-        } else {
-            stopPlaying();
-        }
+            if (start) {
+                startPlaying();
+            } else {
+                stopPlaying();
+            }
     }
 
     private void startPlaying() {
@@ -156,6 +185,17 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
+        if (mFileNameTextBox.getText().toString().isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setMessage("You must give this file a name")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // nothing
+                        }
+                    }).show();
+        }
+
         if (mPlaying) {
             stopPlaying();
         }
@@ -163,9 +203,7 @@ public class RecordActivity extends AppCompatActivity {
         mPlayButton.setEnabled(false);
 
         // Make filename from timestamp
-        Date date = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        mFileName = dateFormat.format(date) + ".3gp";      // 20151123-15:59:48
+        mFileName = mFileNameTextBox.getText().toString() + ".3gp";      // 20151123-15:59:48
 
         String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
         File dir = new File(path);

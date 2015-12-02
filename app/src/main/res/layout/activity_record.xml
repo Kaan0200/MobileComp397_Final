@@ -37,6 +37,24 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Clip Name"
+                android:id="@+id/textView4" />
+
+            <EditText
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/fileNameTextBox" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:weightSum="5"
             android:layout_marginBottom="10dp"
@@ -50,12 +68,12 @@
                 android:id="@+id/textView"
                 android:layout_weight="1" />
 
-            <SeekBar
+            <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/recordBar"
-                android:layout_weight="3"
-                android:indeterminate="false" />
+                android:text="Save New Custom Sound"
+                android:id="@+id/returnButton"
+                android:layout_weight="3" />
 
             <TextView
                 android:layout_width="0dp"
@@ -67,4 +85,5 @@
 
         </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>

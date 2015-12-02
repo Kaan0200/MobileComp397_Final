@@ -86,6 +86,8 @@ public class MachineActivity extends AppCompatActivity {
     public int hhatSoundId;
     public int custSoundId;
 
+    public ArrayAdapter<String> custAdapter;
+
     // this is the timers and variables for the timer thread
     public final Handler mHandle = new Handler();
     public long startTime = 0;
@@ -147,6 +149,7 @@ public class MachineActivity extends AppCompatActivity {
         mSectionCountTextView = (TextView) findViewById(R.id.sectionNumberText);
         mLoopTimerTextView = (TextView) findViewById(R.id.loopTimeTextView);
         mInstrumentVolumeTextView = (TextView) findViewById(R.id.InstrumentVolumeTextView);
+        mInstrumentVolumeTextView.setText("Volume: 10");
         // get all the toggles
         findAllBeatToggleButtons();
         mPlayToggle = (ToggleButton) findViewById(R.id.playToggle);
@@ -155,9 +158,6 @@ public class MachineActivity extends AppCompatActivity {
         ArrayAdapter<String> instrumentAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.instruments));
         mInstrumentSelector.setAdapter(instrumentAdapter);
-        // create the adapter for the parameter selector
-        ArrayAdapter<String> parameterAdapter = new ArrayAdapter<>
-                (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.param_length));
         // create adapters for the instrument types
         final ArrayAdapter<String> kickAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.kick_type));
@@ -165,7 +165,7 @@ public class MachineActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.clap_type));
         final ArrayAdapter<String> cymbAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
-        final ArrayAdapter<String> custAdapter = new ArrayAdapter<>(
+        custAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_1, mRecordings);
 
 
@@ -179,6 +179,8 @@ public class MachineActivity extends AppCompatActivity {
                     if (mInstrumentSelector.getSelectedItem().toString() == "Custom"){
                         mNewCustomButton.setEnabled(true);
                     }
+                    mInstrumentVolumeSeekBar.setEnabled(true);
+                    mBPMSeekBar.setEnabled(true);
                 } else { // PLAY
                     // disable buttons
                     mNewCustomButton.setEnabled(false);
@@ -579,5 +581,6 @@ public class MachineActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && data != null) {
             mRecordings.addAll(data.getStringArrayListExtra("recordings"));
         }
+        custAdapter.notifyDataSetChanged();
     }
 }
