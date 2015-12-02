@@ -27,7 +27,6 @@ public class MachineActivity extends AppCompatActivity {
     // fill the ListViews with String Arrays
     public Spinner mInstrumentSelector;
     public Spinner mInstrumentTypeSelector;
-    public Spinner mParameterSelector;
     public SeekBar mBPMSeekBar;
     public SeekBar mInstrumentVolumeSeekBar;
     public TextView mBPMTextView;
@@ -46,7 +45,7 @@ public class MachineActivity extends AppCompatActivity {
     public String mSelectedKickType = "trance";
     public String mSelectedClapType = "clap1";
     public String mSelectedHatType  = "loose";
-    public String mSelectedCustomType; //TODO: if none, then don't
+    public String mSelectedCustomType;
     public int mSelectedKickVolume   = 10;
     public int mSelectedClapVolume   = 10;
     public int mSelectedHatVolume    = 10;
@@ -86,7 +85,6 @@ public class MachineActivity extends AppCompatActivity {
     public int clapSoundId;
     public int hhatSoundId;
     public int custSoundId;
-    //TODO: loaded custom sound ID
 
     // this is the timers and variables for the timer thread
     public final Handler mHandle = new Handler();
@@ -167,6 +165,8 @@ public class MachineActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.clap_type));
         final ArrayAdapter<String> cymbAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.highhat_type));
+        final ArrayAdapter<String> custAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_1, mRecordings);
 
 
         // set up the on change listener for the play button
@@ -294,7 +294,7 @@ public class MachineActivity extends AppCompatActivity {
                     case "Custom":
                         SetToggleLine(customLine);
                         mNewCustomButton.setEnabled(true);
-                        //TODO: create and handle adapter for custom sounds
+                        mInstrumentTypeSelector.setAdapter(custAdapter);
                         mInstrumentVolumeSeekBar.setProgress(mSelectedCustomVolume);
                         break;
                 }
@@ -541,10 +541,9 @@ public class MachineActivity extends AppCompatActivity {
             Log.i("SOUND!", "hat on beat" + beat);
             mSoundPool.play(hhatSoundId, mSelectedHatVolume, mSelectedHatVolume, 1, 0, 1f);
         }
-        //TODO: add custom sound
         if (customLine[beat] == true){
             Log.i("SOUND!", "custom on beat" + beat);
-            mSoundPool.play(custSoundId, v, v, 1, 0, 1f);
+            mSoundPool.play(custSoundId, mSelectedCustomVolume, mSelectedCustomVolume, 1, 0, 1f);
         }
     }
 
@@ -568,8 +567,6 @@ public class MachineActivity extends AppCompatActivity {
         hhatSoundId = mSoundPool.load(this,
                 MachineActivity.this.getResources().getIdentifier(hhatName, "raw", MachineActivity.this.getPackageName()),
                 1);
-
-        //TODO: load the custom sound to the SoundPool
         String customName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
         customName += mSelectedCustomType;
         custSoundId = mSoundPool.load(customName, 1);
