@@ -21,13 +21,14 @@
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New ToggleButton"
-                android:id="@+id/toggleButton" />
+                android:text="Record"
+                android:id="@+id/toggleButton"
+                android:checked="false" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Button"
+                android:text="Save Recording"
                 android:id="@+id/button2" />
         </LinearLayout>
 
