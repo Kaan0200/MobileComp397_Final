@@ -138,7 +138,7 @@ public class RecordActivity extends AppCompatActivity {
             mPlayer = new MediaPlayer();
             mPlayButton.setText("Stop");
             try {
-                mPlayer.setDataSource(Environment.getExternalStorageDirectory() + mFileName);
+                mPlayer.setDataSource(Environment.getExternalStorageDirectory() + "/FinalProj/" + mFileName);
                 mPlayer.prepare();
                 mPlayer.start();
             } catch (IOException e) {
