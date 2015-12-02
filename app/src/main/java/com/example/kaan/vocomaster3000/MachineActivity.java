@@ -570,7 +570,7 @@ public class MachineActivity extends AppCompatActivity {
                 1);
 
         //TODO: load the custom sound to the SoundPool
-        String customName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String customName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
         customName += mSelectedCustomType;
         custSoundId = mSoundPool.load(customName, 1);
 

@@ -165,14 +165,13 @@ public class RecordActivity extends AppCompatActivity {
         // Make filename from timestamp
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        String name = dateFormat.format(date) + ".3gp";      // 20151123-15:59:48
+        mFileName = dateFormat.format(date) + ".3gp";      // 20151123-15:59:48
 
         String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
         File dir = new File(path);
         if(!dir.exists())
             dir.mkdirs();
-        String file = path + name;
-        mFileName = "/FinalProj/" + name;
+        String file = path + mFileName;
 
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
@@ -199,7 +198,7 @@ public class RecordActivity extends AppCompatActivity {
         }
         catch (Exception e) {
             // Stop happened too fast, delete file
-            String filename = Environment.getExternalStorageDirectory().getAbsolutePath();
+            String filename = Environment.getExternalStorageDirectory().getAbsolutePath() + "/FinalProj/";
             filename += mFileName;
             File lastRecording = new File(filename);
             lastRecording.delete();
