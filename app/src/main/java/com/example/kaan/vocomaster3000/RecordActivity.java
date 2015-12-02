@@ -34,7 +34,7 @@ public class RecordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mRecordButton = (ToggleButton)findViewById(R.id.recordButton);
+        mRecordButton = (ToggleButton) findViewById(R.id.recordToggleButton);
         //mRecordButton.setText("Record");
         /*mRecordButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
             @Override

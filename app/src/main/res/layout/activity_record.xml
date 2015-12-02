@@ -22,8 +22,9 @@
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Record"
-                android:id="@+id/recordButton"
+                android:textOn="Stop"
+                android:textOff="Record"
+                android:id="@+id/recordToggleButton"
                 android:checked="false" />
 
             <Button

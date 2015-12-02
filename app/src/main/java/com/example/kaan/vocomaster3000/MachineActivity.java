@@ -126,7 +126,6 @@ public class MachineActivity extends AppCompatActivity {
         // get the spinners
         mInstrumentSelector = (Spinner) findViewById(R.id.instrumentSelectorSpinner);
         mInstrumentTypeSelector = (Spinner) findViewById(R.id.instrumentTypeSpinner);
-        mParameterSelector = (Spinner) findViewById(R.id.parameterSpinner);
         // get the slider, set initial value
         mBPMSeekBar = (SeekBar) findViewById(R.id.bpmSeekbar);
         mBPMSeekBar.setProgress(38);
@@ -152,7 +151,6 @@ public class MachineActivity extends AppCompatActivity {
         // create the adapter for the parameter selector
         ArrayAdapter<String> parameterAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.param_length));
-        mParameterSelector.setAdapter(parameterAdapter);
         // create adapters for the instrument types
         final ArrayAdapter<String> kickAdapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.kick_type));
