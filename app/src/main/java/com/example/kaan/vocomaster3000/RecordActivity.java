@@ -1,5 +1,7 @@
 package com.example.kaan.vocomaster3000;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -10,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
@@ -31,6 +34,8 @@ public class RecordActivity extends AppCompatActivity {
     private SeekBar mProgress;
     private ToggleButton mRecordButton;
     private Button mPlayButton = null;
+    private EditText mFileNameTextEntry;
+
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
 
@@ -41,6 +46,8 @@ public class RecordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
+
+        mFileNameTextEntry = (EditText) findViewById(R.id.fileNameTextField);
 
         mProgress = (SeekBar) findViewById(R.id.recordBar);
         mProgress.setEnabled(false);
@@ -100,7 +107,7 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void startPlaying() {
-        if (mFileName != null) {
+        if (!mFileName.isEmpty() || mFileName != null) {
             mPlayer = new MediaPlayer();
             mPlayButton.setText("Stop");
             try {
@@ -110,6 +117,16 @@ public class RecordActivity extends AppCompatActivity {
             } catch (IOException e) {
                 Log.e(LOG_TAG, "prepare() failed");
             }
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("File must have a name")
+                    .setMessage("You must give the recording a name before it can be saved.")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // nothing
+                        }
+                    }).show();
         }
     }
 
@@ -128,15 +145,14 @@ public class RecordActivity extends AppCompatActivity {
         mRecordButton.setText("Stop");
         mPlayButton.setEnabled(false);
 
-        // Make filename from timestamp
-        Date date = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        mFileName = dateFormat.format(date);      // 20151123-15:59:48
+        // Make filename from textEntry
+        String mFileName = mFileNameTextEntry.getText().toString();
+
         String filename = Environment.getExternalStorageDirectory().getAbsolutePath();
         filename += mFileName;
 
         mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         mRecorder.setOutputFile(filename);
