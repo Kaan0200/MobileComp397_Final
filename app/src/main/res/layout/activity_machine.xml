@@ -15,7 +15,16 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="4">
+            android:weightSum="6">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/InstrumentLabelTextView"
+                android:layout_weight="1"
+                android:text="@string/instrument"
+                android:layout_gravity="center" />
 
             <Spinner
                 android:layout_width="0dp"
@@ -29,27 +38,38 @@
                 android:textOff="Play"
                 android:textOn="Stop"
                 android:id="@+id/playToggle"
-                android:layout_weight="2"
+                android:layout_weight="3"
                 android:layout_width="0dp" />
+
         </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2">
+            android:weightSum="6">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/instrument_type"
+                android:id="@+id/textView3"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center" />
 
             <Spinner
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/instrumentTypeSpinner"
-                android:layout_weight="1" />
+                android:layout_weight="2" />
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="00dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="3">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -86,30 +106,24 @@
                 android:singleLine="true" />
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:weightSum="4">
+                android:orientation="vertical">
 
-                <Spinner
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/parameterSpinner"
-                    android:layout_weight="1" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Volume: ~x~"
+                    android:id="@+id/InstrumentVolumeTextView"
+                    android:layout_gravity="center_horizontal" />
 
-                <ScrollView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/scrollView4"
-                    android:layout_weight="3">
-
-                    <ListView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/listView4" />
-                </ScrollView>
-
+                <SeekBar
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/InstrumentVolumeSeekbar"
+                    android:max="10" />
             </LinearLayout>
 
         </LinearLayout>

@@ -26,7 +26,9 @@ public class MachineActivity extends AppCompatActivity {
     public Spinner mInstrumentTypeSelector;
     public Spinner mParameterSelector;
     public SeekBar mBPMSeekBar;
+    public SeekBar mInstrumentVolumeSeekBar;
     public TextView mBPMTextView;
+    public TextView mInstrumentVolumeTextView;
     public TextView mTotalTimerTextView;
     public TextView mBeatCountTextView;
     public TextView mSectionCountTextView;
@@ -40,8 +42,12 @@ public class MachineActivity extends AppCompatActivity {
     public int mSelectedCustom;
     public String mSelectedKickType = "trance";
     public String mSelectedClapType = "clap1";
-    public String mSelectedHatType = "loose";
-    public String mSelectedCustomType; //TODO: if none, then dont
+    public String mSelectedHatType  = "loose";
+    public String mSelectedCustomType; //TODO: if none, then don't
+    public int mSelectedKickVolume   = 10;
+    public int mSelectedClapVolume   = 10;
+    public int mSelectedHatVolume    = 10;
+    public int mSelectedCustomVolume = 10;
 
     // variable to hold which was the last selected line, for saving
     // default: kick
@@ -124,6 +130,9 @@ public class MachineActivity extends AppCompatActivity {
         // get the slider, set initial value
         mBPMSeekBar = (SeekBar) findViewById(R.id.bpmSeekbar);
         mBPMSeekBar.setProgress(38);
+        // get the volume slider, set initial value
+        mInstrumentVolumeSeekBar = (SeekBar) findViewById(R.id.InstrumentVolumeSeekbar);
+        mInstrumentVolumeSeekBar.setProgress(10);
         // get thmBPMTextViewview, set text
         mBPMTextView = (TextView) findViewById(R.id.bpmText);
         mBPMTextView.setText("BPM: 128");
@@ -131,6 +140,7 @@ public class MachineActivity extends AppCompatActivity {
         mBeatCountTextView = (TextView) findViewById(R.id.beatCountText);
         mSectionCountTextView = (TextView) findViewById(R.id.sectionNumberText);
         mLoopTimerTextView = (TextView) findViewById(R.id.loopTimeTextView);
+        mInstrumentVolumeTextView = (TextView) findViewById(R.id.InstrumentVolumeTextView);
         // get all the toggles
         findAllBeatToggleButtons();
         mPlayToggle = (ToggleButton) findViewById(R.id.playToggle);
@@ -159,7 +169,14 @@ public class MachineActivity extends AppCompatActivity {
 
                 if (b == false) { // STOP
                     mHandle.removeCallbacks(mTimerRunner);
+                    if (mInstrumentSelector.getSelectedItem().toString() == "Custom"){
+                        mNewCustomButton.setEnabled(true);
+                    }
                 } else { // PLAY
+                    // disable buttons
+                    mNewCustomButton.setEnabled(false);
+                    mInstrumentVolumeSeekBar.setEnabled(false);
+                    mBPMSeekBar.setEnabled(false);
                     // save the lines
                     switch (mInstrumentSelector.getSelectedItem().toString()) {
                         case "Kick":
@@ -179,9 +196,9 @@ public class MachineActivity extends AppCompatActivity {
                             mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
                             break;
                     }
+
                     // load the selected sounds into the pool
                     LoadSounds_AwaitCompletion();
-
 
                     // reset the timer
                     startTime = System.currentTimeMillis();
@@ -210,22 +227,25 @@ public class MachineActivity extends AppCompatActivity {
                             kickLine = SaveToggleLine();
                             mSelectedKick = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedKickType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mNewCustomButton.setEnabled(false);
                             break;
                         case "Clap":
                             clapLine = SaveToggleLine();
                             mSelectedClap = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedClapType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mNewCustomButton.setEnabled(false);
                             break;
                         case "Highhat":
                             cymbalLine = SaveToggleLine();
                             mSelectedHat = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedHatType = mInstrumentTypeSelector.getSelectedItem().toString();
+                            mNewCustomButton.setEnabled(false);
                             break;
                         case "Custom":
                             customLine = SaveToggleLine();
                             mSelectedCustom = mInstrumentTypeSelector.getSelectedItemPosition();
                             mSelectedCustomType = mInstrumentTypeSelector.getSelectedItem().toString();
-                            mNewCustomButton.setEnabled(false);
+                            mNewCustomButton.setEnabled(true);
                             break;
                     }
                 } catch (NullPointerException e) {

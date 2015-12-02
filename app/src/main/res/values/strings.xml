@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Vocomaster3000</string>
     <string name="new_custom">New Custom</string>
+    <string name="instrument">Instrument</string>
+    <string name="instrument_type">Type</string>
     <string-array name="instruments">
         <item>"Kick"</item>
         <item>"Clap"</item>
